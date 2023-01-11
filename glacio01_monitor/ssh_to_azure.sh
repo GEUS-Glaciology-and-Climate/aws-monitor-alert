@@ -11,4 +11,4 @@
 # Jan 11, 2023
 
 filename="glacio01_$(date -u +"%Y%m%dT%H%M").txt"
-ssh azure-aws -T "cd ~/monitoring/glacio01_monitor; mv glacio01_*.txt $filename; touch $filename"
+ssh azure-aws -T "cd /home/aws/aws-monitor-alert/glacio01_monitor; mv glacio01_*.txt $filename; touch $filename"
