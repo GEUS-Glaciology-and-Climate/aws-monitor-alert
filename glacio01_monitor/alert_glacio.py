@@ -63,6 +63,7 @@ def check_glacio_update_time(filepath):
 
 def send_alert_email(receiver_emails):
     ''' Use smtp to login to gmail and send an alert email
+    See: https://realpython.com/python-send-email/
 
     Parameters
     ----------
