@@ -24,7 +24,7 @@ import glob
 import os
 from datetime import datetime
 
-from IPython import embed
+# from IPython import embed
 
 def parse_arguments():
     parser = ArgumentParser(description="Monitor for glacio01")
@@ -128,7 +128,7 @@ if __name__ == '__main__':
 
     glacio_alert = check_glacio_update_time(glacio_file[0])
 
-    receiver_emails = ["pajwr@geus.dk"]
+    receiver_emails = ["pajwr@geus.dk","pho@geus.dk"]
     # receiver_emails = ["pajwr@geus.dk","pho@geus.dk","rsf@geus.dk","aso@geus.dk","shl@geus.dk"]
 
     if glacio_alert is True:
