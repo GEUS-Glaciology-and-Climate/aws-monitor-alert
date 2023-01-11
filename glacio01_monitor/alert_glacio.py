@@ -126,6 +126,8 @@ if __name__ == '__main__':
 
     glacio_file = glob.glob(args.glacio01_filepath)
 
+    # TO DO: check here if len(glacio_file) > 0 (do we have a file?)
+    # If not, then skip checking and alerting and print message that no file is present.
     glacio_alert = check_glacio_update_time(glacio_file[0])
 
     receiver_emails = ["pajwr@geus.dk","pho@geus.dk"]
