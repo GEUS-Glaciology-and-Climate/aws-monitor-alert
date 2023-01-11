@@ -27,9 +27,14 @@ from datetime import datetime
 from IPython import embed
 
 def parse_arguments():
-    parser = ArgumentParser(description="Monitor for glacio01")       
-    parser.add_argument('-a', '--account', default='/home/aws/monitoring/credentials/accounts.ini', type=str, required=False, help='Email account .ini file')
-    parser.add_argument('-p', '--password', default='/home/aws/monitoring/credentials/credentials.ini', type=str, required=False, help='Email credentials .ini file')                      
+    parser = ArgumentParser(description="Monitor for glacio01")
+
+    parser.add_argument('-a', '--account', default='/home/aws/aws-monitor-alert/credentials/accounts.ini',
+        type=str, required=False, help='Email account .ini file')
+    parser.add_argument('-p', '--password', default='/home/aws/aws-monitor-alert/credentials/credentials.ini',
+        type=str, required=False, help='Email credentials .ini file')
+    parser.add_argument('--glacio01-filepath', default='/home/aws/aws-monitor-alert/glacio01_monitor/glacio01_*.txt',
+        type=str, required=False, help='Path to the file being updated from glacio01')
     args = parser.parse_args()
     return args
 
@@ -119,7 +124,7 @@ if __name__ == '__main__':
     """Executed from the command line"""
     args = parse_arguments()
 
-    glacio_file = glob.glob("glacio01_*.txt")
+    glacio_file = glob.glob(args.glacio01_filepath)
 
     glacio_alert = check_glacio_update_time(glacio_file[0])
 
