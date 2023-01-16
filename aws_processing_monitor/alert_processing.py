@@ -18,7 +18,7 @@ import os
 from datetime import datetime
 from ftplib import FTP
 
-from IPython import embed
+# from IPython import embed
 
 def parse_arguments():
     parser = ArgumentParser(description="Monitor for glacio01")
