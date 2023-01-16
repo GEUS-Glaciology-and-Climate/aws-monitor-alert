@@ -18,5 +18,5 @@
 
 # Create a generic monitor file, and simply touch the file to update the last updated time
 filename="glacio01_monitor.txt"
-ssh azure-aws -T "cd /home/aws/aws-monitor-alert/glacio01_monitor; touch $filename"
+ssh azure-aws -T "cd /home/aws/aws-monitor-alert/glacio01_monitor; touch -m $filename"
 
