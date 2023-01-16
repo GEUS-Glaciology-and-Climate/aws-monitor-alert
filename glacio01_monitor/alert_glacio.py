@@ -66,7 +66,7 @@ def check_glacio_update_time(filepath):
             status = True
     return status
 
-def send_alert_email(receiver_emails):
+def send_alert_email(receiver_emails, subject_text, body_text):
     ''' Use smtp to login to gmail and send an alert email
     See: https://realpython.com/python-send-email/
 
@@ -74,6 +74,10 @@ def send_alert_email(receiver_emails):
     ----------
     receiver_emails : list
         List of email addresses to send alerts to
+    subject_text : str
+        The email subject
+    body_text : str
+        Message for the email body
 
     Returns
     -------
@@ -101,15 +105,10 @@ def send_alert_email(receiver_emails):
 
     #----------------------------------
 
-    body = '''
-    glacio01 is no longer updating the monitor .txt file at Azure.
-
-    If glacio01 is inaccessible, then email GEUS IT at geusithjaelp@geus.dk
-    '''
     headers = f"From: {account}\r\n"
     headers += f"To: {', '.join(receiver_emails)}\r\n" 
-    headers += f"Subject: ALERT: glacio01 down!\r\n"
-    email_message = headers + "\r\n" + body  # Blank line needed between headers and body
+    headers += f"Subject: {subject_text}\r\n"
+    email_message = headers + "\r\n" + body_text  # Blank line needed between headers and body
 
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
@@ -126,17 +125,39 @@ if __name__ == '__main__':
 
     glacio_file = glob.glob(args.glacio01_filepath)
 
-    # TO DO: check here if len(glacio_file) > 0 (do we have a file?)
-    # If not, then skip checking and alerting and print message that no file is present.
-    glacio_alert = check_glacio_update_time(glacio_file[0])
+    if len(glacio_file) > 0:
+        glacio_alert = check_glacio_update_time(glacio_file[0])
 
-    receiver_emails = ["pajwr@geus.dk","pho@geus.dk"]
-    # receiver_emails = ["pajwr@geus.dk","pho@geus.dk","rsf@geus.dk","aso@geus.dk","shl@geus.dk"]
+        if glacio_alert is True:
 
-    if glacio_alert is True:
-        send_alert_email(receiver_emails)
+            # receiver_emails = ["pajwr@geus.dk"]
+            receiver_emails = ["pajwr@geus.dk","pho@geus.dk","rsf@geus.dk","aso@geus.dk","shl@geus.dk"]
+
+            subject_text = "ALERT: glacio01 down!"
+
+            body_text = '''
+            glacio01 is no longer updating the monitor .txt file at Azure.
+
+            If glacio01 is inaccessible, then email GEUS IT at geusithjaelp@geus.dk
+            '''
+
+            send_alert_email(receiver_emails, subject_text, body_text)
+        else:
+            print('{} is current. No alert issued.'.format(glacio_file[0]))
     else:
-        print('{} is current. No alert issued.'.format(glacio_file[0]))
+        print('No monitor file found!')
+        receiver_emails = ["pajwr@geus.dk"]
+
+        subject_text = "ALERT: glacio01 monitor file not found on Azure"
+
+        body_text = '''
+        The glacio01 monitor .txt file is not found on Azure!
+
+        Please log onto Azure and check that this file is present. It should be automatically created by the
+        cron job on glacio01. Perhaps the cron for aws user at glacio01 is not running.
+        '''
+
+        send_alert_email(receiver_emails, subject_text, body_text)
 
 else:
     """Executed on import"""
