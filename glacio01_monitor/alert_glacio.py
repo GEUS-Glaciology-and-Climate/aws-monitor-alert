@@ -146,7 +146,7 @@ if __name__ == '__main__':
             print('{} is current. No alert issued.'.format(glacio_file[0]))
     else:
         print('No monitor file found!')
-        receiver_emails = ["pajwr@geus.dk"]
+        receiver_emails = ["pajwr@geus.dk","pho@geus.dk"]
 
         subject_text = "ALERT: glacio01 monitor file not found on Azure"
 
