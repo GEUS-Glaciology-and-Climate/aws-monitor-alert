@@ -91,13 +91,13 @@ def send_alert_email(receiver_emails, subject_text, body_text):
 
     # Define accounts and credentials ini file paths
     accounts_ini = ConfigParser()
-    accounts_ini.readfp(open(accounts_file))    
-    accounts_ini.read(credentials_file) 
-  
+    accounts_ini.read_file(open(accounts_file))
+    accounts_ini.read(credentials_file)
+
     # Get credentials
     account = accounts_ini.get('aws-monitoring', 'account')
     smtp_server = accounts_ini.get('aws-monitoring', 'server')
-    port = accounts_ini.getint('aws-monitoring', 'port')    
+    port = accounts_ini.getint('aws-monitoring', 'port')
     password = accounts_ini.get('aws-monitoring', 'password')
     if not password:
         password = input('password for AWS email account: ')
