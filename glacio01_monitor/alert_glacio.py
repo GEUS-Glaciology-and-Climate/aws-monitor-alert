@@ -5,9 +5,9 @@ Monitor script for glacio01 server
 
 This script is intended to work with the following routine:
 
-- glacio01 has an hourly (top-of-hour) cron that updates the name
-  and update time of a text file at Azure (ssh_to_azure.sh)
-- alert_glacio.py (this script) runs at 5 min after the hour on Azure VM,
+- glacio01 has an hourly (top-of-hour) cron that touches a simple text file at
+  Azure (ssh_to_azure.sh). This updates the last-updated time on the file.
+- alert_glacio.py (this script) runs at 2 min after the hour on Azure VM,
   and checks the update time of the file.
 - If time is older than an hour ago (and younger than two hours ago),
   we send out email alerts that glacio01 may be down. Checking two hours
