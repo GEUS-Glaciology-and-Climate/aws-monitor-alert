@@ -2,7 +2,7 @@
 Monitoring and alerting of processing resources for automatic weather stations (aws).
 
 To develop with this code, you need to activate the `py39-monitor` conda environment on Azure.
-If you are developing elsewhere setup a fresh py 3.9 conda env and install any additional needed requirements.
+If you are developing elsewhere setup a fresh python 3.9 conda env and install any additional needed requirements.
 (`requirements.txt` coming soon...!)
 
 A `credentials` directory containing `accounts.ini` and `credentials.ini` is required at the top-level directory of this repo (will be ignored with `.gitignore`).
@@ -49,3 +49,13 @@ Individually monitored processes include the following:
 ### DMI BUFR upload
 
 Log into the DMI ftp server and get the filename of the most recently updated file (files are named such as `'geus_20230116T1307.bufr'`). Parse the time string into an epoch (unix) time. If this time is >1 hr old (and <2 hrs old), send out alert emails. We should always have some stations reporting hourly all year round, therefore we should always have an hourly BUFR file upload.
+
+### aws-l0 and aws-l3 file update times
+
+This monitor is implemented for the following directory paths on Azure:
+
+- aws-l0/tx
+- aws-l3/tx
+- aws-l3/level_3
+
+Walk through all files (or subdirectories and files if present) and find most recently updated file. If this time is >1 hr old (and <2 hrs old), send out alert emails.
