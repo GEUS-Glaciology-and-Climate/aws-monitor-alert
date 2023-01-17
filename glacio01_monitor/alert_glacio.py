@@ -33,7 +33,7 @@ def parse_arguments():
         type=str, required=False, help='Email account .ini file')
     parser.add_argument('-p', '--password', default='/home/aws/aws-monitor-alert/credentials/credentials.ini',
         type=str, required=False, help='Email credentials .ini file')
-    parser.add_argument('--glacio01-filepath', default='/home/aws/aws-monitor-alert/glacio01_monitor/glacio01_*.txt',
+    parser.add_argument('--glacio01-path', default='/home/aws/aws-monitor-alert/glacio01_monitor/glacio01_monitor.txt',
         type=str, required=False, help='Path to the file being updated from glacio01')
     args = parser.parse_args()
     return args
@@ -54,16 +54,15 @@ def check_glacio_update_time(filepath):
     '''
     status = False
 
-    if os.path.isfile(filepath):
-        # all times are unix time (epoch seconds)
-        update_time = os.path.getmtime(filepath)
+    # all times are unix time (epoch seconds)
+    update_time = os.path.getmtime(filepath)
 
-        now = datetime.now().timestamp()
-        one_hour_ago = now - (60 * 60)
-        two_hours_ago = now - (60 * 60 * 2)
+    now = datetime.now().timestamp()
+    one_hour_ago = now - (60 * 60)
+    two_hours_ago = now - (60 * 60 * 2)
 
-        if (update_time < one_hour_ago) and (update_time > two_hours_ago):
-            status = True
+    if (update_time < one_hour_ago) and (update_time > two_hours_ago):
+        status = True
     return status
 
 def send_alert_email(receiver_emails, subject_text, body_text):
@@ -87,18 +86,16 @@ def send_alert_email(receiver_emails, subject_text, body_text):
     accounts_file = args.account
     credentials_file = args.password
 
-    #----------------------------------
-
     # Define accounts and credentials ini file paths
     accounts_ini = ConfigParser()
     accounts_ini.read_file(open(accounts_file))
     accounts_ini.read(credentials_file)
 
     # Get credentials
-    account = accounts_ini.get('aws-monitoring', 'account')
-    smtp_server = accounts_ini.get('aws-monitoring', 'server')
-    port = accounts_ini.getint('aws-monitoring', 'port')
-    password = accounts_ini.get('aws-monitoring', 'password')
+    account = accounts_ini.get('aws', 'account')
+    smtp_server = accounts_ini.get('aws', 'server')
+    port = accounts_ini.getint('aws', 'port')
+    password = accounts_ini.get('aws', 'password')
     if not password:
         password = input('password for AWS email account: ')
     print('Logging into server %s, account %s' %(smtp_server, account))
@@ -123,27 +120,32 @@ if __name__ == '__main__':
     """Executed from the command line"""
     args = parse_arguments()
 
-    glacio_file = glob.glob(args.glacio01_filepath)
+    glacio_file = args.glacio01_path
 
-    if len(glacio_file) > 0:
-        glacio_alert = check_glacio_update_time(glacio_file[0])
+    if os.path.isfile(glacio_file):
+        glacio_alert = check_glacio_update_time(glacio_file)
 
         if glacio_alert is True:
 
-            # receiver_emails = ["pajwr@geus.dk"]
-            receiver_emails = ["pajwr@geus.dk","pho@geus.dk","rsf@geus.dk","aso@geus.dk","shl@geus.dk"]
+            receiver_emails = [
+                "pajwr@geus.dk",
+                "pho@geus.dk",
+                "rsf@geus.dk",
+                "aso@geus.dk",
+                "shl@geus.dk"
+                ]
 
             subject_text = "ALERT: glacio01 down!"
 
             body_text = '''
-            glacio01 is no longer updating the monitor .txt file at Azure.
+            glacio01 is no longer updating glacio01_monitor.txt at Azure.
 
             If glacio01 is inaccessible, then email GEUS IT at geusithjaelp@geus.dk
             '''
 
             send_alert_email(receiver_emails, subject_text, body_text)
         else:
-            print('{} is current. No alert issued.'.format(glacio_file[0]))
+            print('{} is current. No alert issued.'.format(glacio_file.split('/')[-1]))
     else:
         print('No monitor file found!')
         receiver_emails = ["pajwr@geus.dk","pho@geus.dk"]
@@ -151,10 +153,10 @@ if __name__ == '__main__':
         subject_text = "ALERT: glacio01 monitor file not found on Azure"
 
         body_text = '''
-        The glacio01 monitor .txt file is not found on Azure!
+        The glacio01_monitor.txt file is not found on Azure!
 
-        Please log onto Azure and check that this file is present. It should be automatically created by the
-        cron job on glacio01. Perhaps the cron for aws user at glacio01 is not running.
+        Please log onto Azure and check that this file is present. It should be automatically created
+        by the cron job on glacio01. Perhaps the cron for aws user at glacio01 is not running.
         '''
 
         send_alert_email(receiver_emails, subject_text, body_text)

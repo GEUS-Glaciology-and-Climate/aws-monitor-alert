@@ -57,9 +57,9 @@ def check_dmi_ftp_update_time():
     status = False
 
     # Get credentials
-    HOST = accounts_ini.get('dmi-monitoring', 'server')
-    USER = accounts_ini.get('dmi-monitoring', 'user')    
-    PASSWD = accounts_ini.get('dmi-monitoring', 'password')
+    HOST = accounts_ini.get('dmi', 'server')
+    USER = accounts_ini.get('dmi', 'user')
+    PASSWD = accounts_ini.get('dmi', 'password')
     if not PASSWD:
         PASSWD = input('password for dmi ftp account: ')
     print('Logging into {}'.format(HOST))
@@ -141,10 +141,10 @@ def send_alert_email(receiver_emails, subject_text, body_text):
     None
     '''
     # Get credentials
-    account = accounts_ini.get('aws-monitoring', 'account')
-    smtp_server = accounts_ini.get('aws-monitoring', 'server')
-    port = accounts_ini.getint('aws-monitoring', 'port')    
-    password = accounts_ini.get('aws-monitoring', 'password')
+    account = accounts_ini.get('aws', 'account')
+    smtp_server = accounts_ini.get('aws', 'server')
+    port = accounts_ini.getint('aws', 'port')
+    password = accounts_ini.get('aws', 'password')
     if not password:
         password = input('password for AWS email account: ')
     print('Logging into server %s, account %s' %(smtp_server, account))
@@ -185,9 +185,10 @@ if __name__ == '__main__':
 
     if dmi_alert is True:
 
-        receiver_emails = ["pajwr@geus.dk",
-                           "pho@geus.dk"
-                           ]
+        receiver_emails = [
+            "pajwr@geus.dk",
+            "pho@geus.dk"
+            ]
 
         subject_text = "ALERT: DMI ftp BUFR upload has stopped!"
 
@@ -206,9 +207,10 @@ if __name__ == '__main__':
 
     if l0tx_alert is True:
 
-        receiver_emails = ["pajwr@geus.dk",
-                           "pho@geus.dk"
-                           ]
+        receiver_emails = [
+            "pajwr@geus.dk",
+            "pho@geus.dk"
+            ]
 
         subject_text = "ALERT: aws-l0/tx files are not updating!"
 
@@ -227,9 +229,10 @@ if __name__ == '__main__':
 
     if l3tx_alert is True:
 
-        receiver_emails = ["pajwr@geus.dk",
-                           "pho@geus.dk"
-                           ]
+        receiver_emails = [
+            "pajwr@geus.dk",
+            "pho@geus.dk"
+            ]
 
         subject_text = "ALERT: aws-l3/tx files are not updating!"
 
@@ -248,9 +251,10 @@ if __name__ == '__main__':
 
     if l3joined_alert is True:
 
-        receiver_emails = ["pajwr@geus.dk",
-                           "pho@geus.dk"
-                           ]
+        receiver_emails = [
+            "pajwr@geus.dk",
+            "pho@geus.dk"
+            ]
 
         subject_text = "ALERT: aws-l3/level_3 joined files are not updating!"
 
