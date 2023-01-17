@@ -23,14 +23,14 @@ The `alert_glacio.py` monitoring script is intended to work with the following r
   we send out email alerts that glacio01 may be down. Checking two hours
   ago is to prevent repeated emails if the server is down for an extended time.
 
-Run on Azure crontab as:
+Run with `alert_glacio_wrappper.sh` on Azure crontab as:
 
 ```
 # Monitor/alert for glacio01
-2 * * * * conda activate py39-monitor; cd /home/aws/aws-monitor-alert/glacio01_monitor/ && python alert_glacio.py > stdout 2>stderr; conda deactivate
+2 * * * * . /home/aws/.bashrc; cd /home/aws/aws-monitor-alert/glacio01_monitor; ./alert_glacio_wrapper.sh > stdout 2>stder
 ```
 
-Run on glacio01 crontab as:
+`ssh_to_azure.sh` is run on glacio01 crontab as:
 ```
 # ssh to Azure and update .txt file, for monitoring of glacio01
 0 * * * * . /home/aws/.bashrc; cd /home/aws/aws-monitor-alert/glacio01_monitor; ./ssh_to_azure.sh  > stdout 2>stderr
@@ -38,11 +38,11 @@ Run on glacio01 crontab as:
 
 ## AWS processing monitors
 
-Multiple monitors for AWS processing (pypromice) are run from `alert_processing.py` at 10 minutes after the hour. Run on Azure crontab as:
+Multiple monitors for AWS processing (pypromice) are run from `alert_processing.py` at 11 minutes after the hour. Run with `alert_processing_wrapper.sh` on Azure crontab as:
 
 ```
 # Monitor/alert for aws processing
-10 * * * * conda activate py39-monitor; cd /home/aws/aws-monitor-alert/aws_processing_monitor/ && python alert_processing.py > stdout 2>stderr; conda deactivate
+11 * * * * . /home/aws/.bashrc; cd /home/aws/aws-monitor-alert/aws_processing_monitor; ./alert_processing_wrapper.sh > stdout 2>stderr
 ```
 Individually monitored processes include the following:
 
