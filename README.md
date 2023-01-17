@@ -17,7 +17,7 @@ aws-monitor-alert
 |       credentials.ini
 │
 └───aws_processing_monitor
-│       alert_prcoessing.py
+│       alert_processing.py
 |       alert_processing_wrapper.sh   
 │       stderr   
 │       stdout
