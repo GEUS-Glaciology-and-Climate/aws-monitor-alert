@@ -5,11 +5,36 @@ To develop with this code, you need to activate the `py39-monitor` conda environ
 If you are developing elsewhere setup a fresh python 3.9 conda env and install any additional needed requirements.
 (`requirements.txt` coming soon...!)
 
-A `credentials` directory containing `accounts.ini` and `credentials.ini` is required at the top-level directory of this repo (will be ignored with `.gitignore`).
-
-Note that these scripts implement our own custom monitoring and alerting (sending emails from geus.aws@gmail.com), and are separate from any Azure monitoring tools. Metrics on the Azure virtual machine such as CPU, memory, disk space, etc are currently monitored using built-in Azure monitoring tools.
+The required directory structure of this repo is:
+```
+aws-monitor-alert
+│   README.md
+│   .git/
+|   .gitignore
+│
+└───credentials
+│       accounts.ini
+|       credentials.ini
+│
+└───aws_processing_monitor
+│       alert_prcoessing.py
+|       alert_processing_wrapper.sh   
+│       stderr   
+│       stdout
+│
+└───alert_glacio01_monitor
+        alert_glacio.py
+        alert_glacio_wrapper.sh
+        glacio01_monitor.txt
+        ssh_to_azure.sh
+        stderr
+        stdout
+```
+Note that a `credentials` directory containing `accounts.ini` and `credentials.ini` is required at the top-level directory of this repo, and is ignored with `.gitignore`. `stdout` and `stderr` are also ignored.
 
 **It is recommended to occasionally check the `stdout` and `stderr` files at both monitoring directories to make sure the monitors are running.**
+
+These scripts implement our own custom monitoring and alerting (sending emails from geus.aws@gmail.com), and are separate from any Azure monitoring tools. Metrics on the Azure virtual machine such as CPU, memory, disk space, etc are currently monitored using built-in Azure monitoring tools.
 
 The following are currently implemented:
 
