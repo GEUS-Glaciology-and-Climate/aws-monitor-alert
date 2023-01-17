@@ -36,6 +36,7 @@ Run with `alert_glacio_wrappper.sh` on Azure crontab as:
 0 * * * * . /home/aws/.bashrc; cd /home/aws/aws-monitor-alert/glacio01_monitor; ./ssh_to_azure.sh  > stdout 2>stderr
 ```
 A successful run with no alerts issued will appear in `stdout` as:
+
 `glacio01_monitor.txt is current. No alert issued.`
 
 ## AWS processing monitors
