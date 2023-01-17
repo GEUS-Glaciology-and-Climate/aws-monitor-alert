@@ -35,6 +35,8 @@ Run with `alert_glacio_wrappper.sh` on Azure crontab as:
 # ssh to Azure and update .txt file, for monitoring of glacio01
 0 * * * * . /home/aws/.bashrc; cd /home/aws/aws-monitor-alert/glacio01_monitor; ./ssh_to_azure.sh  > stdout 2>stderr
 ```
+A successful run with no alerts issued will appear in `stdout` as:
+`glacio01_monitor.txt is current. No alert issued.`
 
 ## AWS processing monitors
 
@@ -59,3 +61,13 @@ This monitor is implemented for the following directory paths on Azure:
 - aws-l3/level_3
 
 `walk` through all files (or subdirectories and files if present) and find most recently updated file. If this time is >1 hr old (and <2 hrs old), send out alert emails.
+
+A successful run with no alerts issued will appear in `stdout` as:
+```
+Logging into ftpserver.dmi.dk
+Latest BUFR: geus_20230117T1307.bufr
+DMI BUFR file is current. No alert issued.
+aws-l0/tx files are current. No alert issued.
+aws-l3/tx files are current. No alert issued.
+aws-l3/level_3 files are current. No alert issued.
+```
