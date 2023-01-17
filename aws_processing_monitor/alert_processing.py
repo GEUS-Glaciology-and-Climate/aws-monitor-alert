@@ -21,7 +21,7 @@ from ftplib import FTP
 # from IPython import embed
 
 def parse_arguments():
-    parser = ArgumentParser(description="Monitor for glacio01")
+    parser = ArgumentParser(description="Monitor for aws processing")
 
     parser.add_argument('-a', '--account', default='/home/aws/aws-monitor-alert/credentials/accounts.ini',
         type=str, required=False, help='account .ini file')
