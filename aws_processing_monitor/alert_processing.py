@@ -4,7 +4,10 @@
 Monitor and alert based on metrics related to AWS processing.
 
 Currently implemented:
--- Check latest BUFR file timestamp at DMI ftp upload directory
+- Check latest BUFR file timestamp at DMI ftp upload directory
+- Check aws-l0/tx file update times
+- Check aws-l3/tx file update times
+- Check aws-l3/level_3 file update times
 
 Patrick Wright, GEUS
 Jan 16, 2023
@@ -27,6 +30,14 @@ def parse_arguments():
         type=str, required=False, help='account .ini file')
     parser.add_argument('-p', '--password', default='/home/aws/aws-monitor-alert/credentials/credentials.ini',
         type=str, required=False, help='credentials .ini file')
+
+    parser.add_argument('--l0-tx-path', default='/data/pypromice_aws/aws-l0/tx',
+        type=str, required=False, help='Path to l0 tx directory')
+    parser.add_argument('--l3-tx-path', default='/data/pypromice_aws/aws-l3/tx',
+        type=str, required=False, help='Path to l3 tx directory')
+    parser.add_argument('--l3-joined-path', default='/data/pypromice_aws/aws-l3/level_3',
+        type=str, required=False, help='Path to l3 level_3 (joined) directory')
+
     args = parser.parse_args()
     return args
 
@@ -69,6 +80,46 @@ def check_dmi_ftp_update_time():
     two_hours_ago = now - (60 * 60 * 2)
 
     if (latest_time < one_hour_ago) and (latest_time > two_hours_ago):
+        status = True
+    return status
+
+def check_update_time(dirpath):
+    '''Find the most recent update time for all files in dirpath,
+    and return a status boolean if we pass certain time check thresholds.
+
+    Parameters
+    ----------
+    dirpath : str
+        Directory path to dir containing files or station sub-directories and files
+
+    Returns
+    -------
+    status : bool
+        Result of the check. False (default) is passing, True is alert condition
+    '''
+    status = False
+
+    # One-liner for finding max update time of directories
+    # https://stackoverflow.com/questions/29685069/get-the-last-modified-date-of-a-directory-including-subdirectories-using-pytho
+    # latest_dir_time = max(os.path.getmtime(dirname) for dirname,subdirs,files in os.walk(dirpath))
+
+    # walk through all files within dirpath, find max update time of files
+    # https://stackoverflow.com/questions/2731014/finding-most-recently-edited-file-in-python
+    max_mtime = 0
+    for dirname,subdirs,files in os.walk(dirpath):
+        for fname in files:
+            full_path = os.path.join(dirname, fname)
+            mtime = os.path.getmtime(full_path)
+            if mtime > max_mtime:
+                max_mtime = mtime # epoch sec
+                max_dir = dirname
+                max_file = fname
+
+    now = datetime.now().timestamp()
+    one_hour_ago = now - (60 * 60)
+    two_hours_ago = now - (60 * 60 * 2)
+
+    if (max_mtime < one_hour_ago) and (max_mtime > two_hours_ago):
         status = True
     return status
 
@@ -127,6 +178,9 @@ if __name__ == '__main__':
     accounts_ini.read_file(open(accounts_file))    
     accounts_ini.read(credentials_file)
 
+    #==============================================================
+    # DMI FTP
+    #==============================================================
     dmi_alert = check_dmi_ftp_update_time()
 
     if dmi_alert is True:
@@ -135,16 +189,78 @@ if __name__ == '__main__':
                            "pho@geus.dk"
                            ]
 
-        subject_text = "ALERT: DMI ftp BUFR upload!"
+        subject_text = "ALERT: DMI ftp BUFR upload has stopped!"
 
         body_text = '''
         The most recent concatenated BUFR file at the DMI ftp upload directory is >1 hr old (should be ~3 minutes old).
         There could be a problem with pypromice processing or the ftp upload itself.
         '''
-
         send_alert_email(receiver_emails, subject_text, body_text)
     else:
         print('DMI BUFR file is current. No alert issued.')
+
+    #==============================================================
+    # L0 TX
+    #==============================================================
+    l0tx_alert = check_update_time(args.l0_tx_path)
+
+    if l0tx_alert is True:
+
+        receiver_emails = ["pajwr@geus.dk",
+                           "pho@geus.dk"
+                           ]
+
+        subject_text = "ALERT: aws-l0/tx files are not updating!"
+
+        body_text = '''
+        The most recently updated file at aws-l0/tx is >1 hr old.
+        There could be a problem with pypromice processing.
+        '''
+        send_alert_email(receiver_emails, subject_text, body_text)
+    else:
+        print('aws-l0/tx files are current. No alert issued.')
+
+    #==============================================================
+    # L3 TX
+    #==============================================================
+    l3tx_alert = check_update_time(args.l3_tx_path)
+
+    if l3tx_alert is True:
+
+        receiver_emails = ["pajwr@geus.dk",
+                           "pho@geus.dk"
+                           ]
+
+        subject_text = "ALERT: aws-l3/tx files are not updating!"
+
+        body_text = '''
+        The most recently updated file at aws-l3/tx is >1 hr old.
+        There could be a problem with pypromice processing.
+        '''
+        send_alert_email(receiver_emails, subject_text, body_text)
+    else:
+        print('aws-l3/tx files are current. No alert issued.')
+
+    #==============================================================
+    # L3 level_3 (joined)
+    #==============================================================
+    l3joined_alert = check_update_time(args.l3_joined_path)
+
+    if l3joined_alert is True:
+
+        receiver_emails = ["pajwr@geus.dk",
+                           "pho@geus.dk"
+                           ]
+
+        subject_text = "ALERT: aws-l3/level_3 joined files are not updating!"
+
+        body_text = '''
+        The most recently updated file at aws-l3/level_3 is >1 hr old.
+        There could be a problem with pypromice processing.
+        '''
+        send_alert_email(receiver_emails, subject_text, body_text)
+    else:
+        print('aws-l3/level_3 files are current. No alert issued.')
 
 else:
     """Executed on import"""
