@@ -87,9 +87,9 @@ Log into the DMI ftp server and get the filename of the most recently updated fi
 
 This monitor is implemented for the following directory paths on Azure:
 
-- aws-l0/tx
-- aws-l3/tx
-- aws-l3/level_3
+- `aws-l0/tx`
+- `aws-l3/tx`
+- `aws-l3/level_3`
 
 `walk` through all files (or subdirectories and files if present) and find most recently updated file. If this time is >1 hr old (and <2 hrs old), send out alert emails.
 
