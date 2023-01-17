@@ -58,4 +58,4 @@ This monitor is implemented for the following directory paths on Azure:
 - aws-l3/tx
 - aws-l3/level_3
 
-Walk through all files (or subdirectories and files if present) and find most recently updated file. If this time is >1 hr old (and <2 hrs old), send out alert emails.
+`walk` through all files (or subdirectories and files if present) and find most recently updated file. If this time is >1 hr old (and <2 hrs old), send out alert emails.
