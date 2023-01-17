@@ -22,7 +22,7 @@ aws-monitor-alert
 │       stderr   
 │       stdout
 │
-└───alert_glacio01_monitor
+└───glacio01_monitor
         alert_glacio.py
         alert_glacio_wrapper.sh
         glacio01_monitor.txt
