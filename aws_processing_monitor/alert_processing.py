@@ -215,7 +215,7 @@ if __name__ == '__main__':
         subject_text = "ALERT: aws-l0/tx files are not updating!"
 
         body_text = '''
-        The most recently updated file at aws-l0/tx is >1 hr old.
+        The most recently updated file at aws-l0/tx on Azure is >1 hr old.
         There could be a problem with pypromice processing.
         '''
         send_alert_email(receiver_emails, subject_text, body_text)
@@ -237,7 +237,7 @@ if __name__ == '__main__':
         subject_text = "ALERT: aws-l3/tx files are not updating!"
 
         body_text = '''
-        The most recently updated file at aws-l3/tx is >1 hr old.
+        The most recently updated file at aws-l3/tx on Azure is >1 hr old.
         There could be a problem with pypromice processing.
         '''
         send_alert_email(receiver_emails, subject_text, body_text)
@@ -259,7 +259,7 @@ if __name__ == '__main__':
         subject_text = "ALERT: aws-l3/level_3 joined files are not updating!"
 
         body_text = '''
-        The most recently updated file at aws-l3/level_3 is >1 hr old.
+        The most recently updated file at aws-l3/level_3 on Azure is >1 hr old.
         There could be a problem with pypromice processing.
         '''
         send_alert_email(receiver_emails, subject_text, body_text)
