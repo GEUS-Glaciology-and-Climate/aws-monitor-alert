@@ -9,6 +9,8 @@ A `credentials` directory containing `accounts.ini` and `credentials.ini` is req
 
 Note that these scripts implement our own custom monitoring and alerting (sending emails from geus.aws@gmail.com), and are separate from any Azure monitoring tools. Metrics on the Azure virtual machine such as CPU, memory, disk space, etc are currently monitored using built-in Azure monitoring tools.
 
+**It is recommended to occasionally check the `stdout` and `stderr` files at both monitoring directories to make sure the monitors are running.**
+
 The following are currently implemented:
 
 ## glacio01 monitor
@@ -77,5 +79,3 @@ aws-l3/tx files are current. No alert issued.
 aws-l3/level_3 files are current. No alert issued.
 FINISHED
 ```
-
-**It is recommended to occasionally check the `stdout` and `stderr` files at both monitoring directories to make sure the monitors are running.***
