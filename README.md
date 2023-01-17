@@ -36,8 +36,11 @@ Run with `alert_glacio_wrappper.sh` on Azure crontab as:
 0 * * * * . /home/aws/.bashrc; cd /home/aws/aws-monitor-alert/glacio01_monitor; ./ssh_to_azure.sh  > stdout 2>stderr
 ```
 A successful run with no alerts issued will appear in `stdout` as:
-
-`glacio01_monitor.txt is current. No alert issued.`
+```
+Running alert_glacio.py at Tue Jan 17 13:32:26 UTC 2023
+glacio01_monitor.txt is current. No alert issued.
+FINISHED
+```
 
 ## AWS processing monitors
 
@@ -65,10 +68,12 @@ This monitor is implemented for the following directory paths on Azure:
 
 A successful run with no alerts issued will appear in `stdout` as:
 ```
+Running alert_processing.py at Tue Jan 17 13:32:43 UTC 2023
 Logging into ftpserver.dmi.dk
 Latest BUFR: geus_20230117T1307.bufr
 DMI BUFR file is current. No alert issued.
 aws-l0/tx files are current. No alert issued.
 aws-l3/tx files are current. No alert issued.
 aws-l3/level_3 files are current. No alert issued.
+FINISHED
 ```
