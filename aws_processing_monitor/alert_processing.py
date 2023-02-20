@@ -79,7 +79,8 @@ def check_dmi_ftp_update_time():
     one_hour_ago = now - (60 * 60)
     two_hours_ago = now - (60 * 60 * 2)
 
-    if (latest_time < one_hour_ago) and (latest_time > two_hours_ago):
+    # if (latest_time < one_hour_ago) and (latest_time > two_hours_ago):
+    if latest_time < one_hour_ago:
         status = True
     return status
 
@@ -119,7 +120,8 @@ def check_update_time(dirpath):
     one_hour_ago = now - (60 * 60)
     two_hours_ago = now - (60 * 60 * 2)
 
-    if (max_mtime < one_hour_ago) and (max_mtime > two_hours_ago):
+    # if (max_mtime < one_hour_ago) and (max_mtime > two_hours_ago):
+    if max_mtime < one_hour_ago:
         status = True
     return status
 
