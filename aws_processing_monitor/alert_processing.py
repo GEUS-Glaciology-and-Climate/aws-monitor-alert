@@ -37,6 +37,10 @@ def parse_arguments():
         type=str, required=False, help='Path to l3 tx directory')
     parser.add_argument('--l3-joined-path', default='/data/pypromice_aws/aws-l3/level_3',
         type=str, required=False, help='Path to l3 level_3 (joined) directory')
+    parser.add_argument('--bufr-out-path', default='/data/pypromice_aws/pypromice/src/pypromice/postprocess/BUFR_out',
+        type=str, required=False, help='Path to BUFR_out directory')
+    parser.add_argument('--bufr-backup-path', default='/data/pypromice_aws/pypromice/src/pypromice/postprocess/BUFR_backup',
+        type=str, required=False, help='Path to BUFR_backup directory')
 
     args = parser.parse_args()
     return args
@@ -44,6 +48,9 @@ def parse_arguments():
 def check_dmi_ftp_update_time():
     '''Check the timestamp of the most recent BUFR file at DMI upload directory,
     return a status boolean if we pass certain time check thresholds
+
+    NOTE: THIS IS NOT WORKING. The ftp.nlst() command is not listing files in the
+    DMI ftp directory.
 
     Parameters
     ----------
@@ -180,27 +187,52 @@ if __name__ == '__main__':
     accounts_ini.read_file(open(accounts_file))    
     accounts_ini.read(credentials_file)
 
+    receiver_emails = [
+        "pajwr@geus.dk",
+        "pho@geus.dk",
+        "rsf@geus.dk",
+        "rabni@geus.dk",
+        "syhsv@geus.dk",
+        "aso@geus.dk",
+        "shl@geus.dk",
+        "bav@geus.dk"
+        ]
+
     #==============================================================
     # DMI FTP
     #==============================================================
-    dmi_alert = check_dmi_ftp_update_time()
+    # dmi_alert = check_dmi_ftp_update_time() # NOT WORKING
+    dmi_alert_1 = check_update_time(args.bufr_out_path)
+    dmi_alert_2 = check_update_time(args.bufr_backup_path)
 
-    if dmi_alert is True:
+    # receiver_emails = [
+    #     "pajwr@geus.dk",
+    #     "pho@geus.dk"
+    #     ]
 
-        receiver_emails = [
-            "pajwr@geus.dk",
-            "pho@geus.dk"
-            ]
+    if dmi_alert_1 is True:
 
-        subject_text = "ALERT: DMI ftp BUFR upload has stopped!"
+        subject_text = "ALERT: BUFR_out files are not updating!"
 
         body_text = '''
-        The most recent concatenated BUFR file at the DMI ftp upload directory is >1 hr old (should be ~3 minutes old).
-        There could be a problem with pypromice processing or the ftp upload itself.
+        The individual station BUFR files and/or the concatenated BUFR file are not updating.
+        Expected behavior is for the BUFR_out directory to be emptied and re-populated every hour.
         '''
         send_alert_email(receiver_emails, subject_text, body_text)
     else:
-        print('DMI BUFR file is current. No alert issued.')
+        print('BUFR_out files are current. No alert issued.')
+
+    if dmi_alert_2 is True:
+
+        subject_text = "ALERT: BUFR_backup files are not updating!"
+
+        body_text = '''
+        The concatenated BUFR files in the BUFR_backup directory are not updating.
+        We expect to have one file per hour, for the last 48 hrs.
+        '''
+        send_alert_email(receiver_emails, subject_text, body_text)
+    else:
+        print('BUFR_backup files are current. No alert issued.')
 
     #==============================================================
     # L0 TX
@@ -209,10 +241,10 @@ if __name__ == '__main__':
 
     if l0tx_alert is True:
 
-        receiver_emails = [
-            "pajwr@geus.dk",
-            "pho@geus.dk"
-            ]
+        # receiver_emails = [
+        #     "pajwr@geus.dk",
+        #     "pho@geus.dk"
+        #     ]
 
         subject_text = "ALERT: aws-l0/tx files are not updating!"
 
@@ -231,10 +263,10 @@ if __name__ == '__main__':
 
     if l3tx_alert is True:
 
-        receiver_emails = [
-            "pajwr@geus.dk",
-            "pho@geus.dk"
-            ]
+        # receiver_emails = [
+        #     "pajwr@geus.dk",
+        #     "pho@geus.dk"
+        #     ]
 
         subject_text = "ALERT: aws-l3/tx files are not updating!"
 
@@ -253,10 +285,10 @@ if __name__ == '__main__':
 
     if l3joined_alert is True:
 
-        receiver_emails = [
-            "pajwr@geus.dk",
-            "pho@geus.dk"
-            ]
+        # receiver_emails = [
+        #     "pajwr@geus.dk",
+        #     "pho@geus.dk"
+        #     ]
 
         subject_text = "ALERT: aws-l3/level_3 joined files are not updating!"
 

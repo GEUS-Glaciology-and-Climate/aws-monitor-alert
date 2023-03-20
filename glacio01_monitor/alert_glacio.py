@@ -122,18 +122,21 @@ if __name__ == '__main__':
 
     glacio_file = args.glacio01_path
 
+    receiver_emails = [
+        "pajwr@geus.dk",
+        "pho@geus.dk",
+        "rsf@geus.dk",
+        "rabni@geus.dk",
+        "syhsv@geus.dk",
+        "aso@geus.dk",
+        "shl@geus.dk",
+        "bav@geus.dk"
+        ]
+
     if os.path.isfile(glacio_file):
         glacio_alert = check_glacio_update_time(glacio_file)
 
         if glacio_alert is True:
-
-            receiver_emails = [
-                "pajwr@geus.dk",
-                "pho@geus.dk",
-                "rsf@geus.dk",
-                "aso@geus.dk",
-                "shl@geus.dk"
-                ]
 
             subject_text = "ALERT: glacio01 down!"
 
@@ -148,7 +151,6 @@ if __name__ == '__main__':
             print('{} is current. No alert issued.'.format(glacio_file.split('/')[-1]))
     else:
         print('No monitor file found!')
-        receiver_emails = ["pajwr@geus.dk","pho@geus.dk"]
 
         subject_text = "ALERT: glacio01 monitor file not found on Azure"
 
