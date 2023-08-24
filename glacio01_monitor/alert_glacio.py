@@ -130,7 +130,8 @@ if __name__ == '__main__':
         "syhsv@geus.dk",
         "aso@geus.dk",
         "shl@geus.dk",
-        "bav@geus.dk"
+        "bav@geus.dk",
+        "maclu@geus.dk",
         ]
 
     if os.path.isfile(glacio_file):
