@@ -13,37 +13,39 @@ Patrick Wright, GEUS
 Jan 16, 2023
 '''
 
+import os
+import smtplib
+import ssl
 from argparse import ArgumentParser
 from configparser import ConfigParser
-import smtplib, ssl
-import glob
-import os
 from datetime import datetime
 from ftplib import FTP
 
-# from IPython import embed
 
 def parse_arguments():
     parser = ArgumentParser(description="Monitor for aws processing")
 
     parser.add_argument('-a', '--account', default='/home/aws/aws-monitor-alert/credentials/accounts.ini',
-        type=str, required=False, help='account .ini file')
+                        type=str, required=False, help='account .ini file')
     parser.add_argument('-p', '--password', default='/home/aws/aws-monitor-alert/credentials/credentials.ini',
-        type=str, required=False, help='credentials .ini file')
+                        type=str, required=False, help='credentials .ini file')
 
     parser.add_argument('--l0-tx-path', default='/data/pypromice_aws/aws-l0/tx',
-        type=str, required=False, help='Path to l0 tx directory')
+                        type=str, required=False, help='Path to l0 tx directory')
     parser.add_argument('--l3-tx-path', default='/data/pypromice_aws/aws-l3/tx',
-        type=str, required=False, help='Path to l3 tx directory')
+                        type=str, required=False, help='Path to l3 tx directory')
     parser.add_argument('--l3-joined-path', default='/data/pypromice_aws/aws-l3/level_3',
-        type=str, required=False, help='Path to l3 level_3 (joined) directory')
-    parser.add_argument('--bufr-out-path', default='/data/pypromice_aws/pypromice/src/pypromice/postprocess/BUFR_out',
-        type=str, required=False, help='Path to BUFR_out directory')
-    parser.add_argument('--bufr-backup-path', default='/data/pypromice_aws/pypromice/src/pypromice/postprocess/BUFR_backup',
-        type=str, required=False, help='Path to BUFR_backup directory')
+                        type=str, required=False, help='Path to l3 level_3 (joined) directory')
+    parser.add_argument('--bufr-out-path',
+                        default='/data/pypromice_aws/pypromice/last_modified_utils/pypromice/postprocess/BUFR_out',
+                        type=str, required=False, help='Path to BUFR_out directory')
+    parser.add_argument('--bufr-backup-path',
+                        default='/data/pypromice_aws/pypromice/last_modified_utils/pypromice/postprocess/BUFR_backup',
+                        type=str, required=False, help='Path to BUFR_backup directory')
 
     args = parser.parse_args()
     return args
+
 
 def check_dmi_ftp_update_time():
     '''Check the timestamp of the most recent BUFR file at DMI upload directory,
@@ -72,7 +74,7 @@ def check_dmi_ftp_update_time():
     print('Logging into {}'.format(HOST))
 
     ftp = FTP(HOST)
-    ftp.login(USER,PASSWD)
+    ftp.login(USER, PASSWD)
     ftp.cwd('upload')
     lines = ftp.nlst("-t")
     latest_name = lines[-1]
@@ -90,6 +92,7 @@ def check_dmi_ftp_update_time():
     if latest_time < one_hour_ago:
         status = True
     return status
+
 
 def check_update_time(dirpath):
     '''Find the most recent update time for all files in dirpath,
@@ -114,12 +117,12 @@ def check_update_time(dirpath):
     # walk through all files within dirpath, find max update time of files
     # https://stackoverflow.com/questions/2731014/finding-most-recently-edited-file-in-python
     max_mtime = 0
-    for dirname,subdirs,files in os.walk(dirpath):
+    for dirname, subdirs, files in os.walk(dirpath):
         for fname in files:
             full_path = os.path.join(dirname, fname)
             mtime = os.path.getmtime(full_path)
             if mtime > max_mtime:
-                max_mtime = mtime # epoch sec
+                max_mtime = mtime  # epoch sec
                 max_dir = dirname
                 max_file = fname
 
@@ -131,6 +134,7 @@ def check_update_time(dirpath):
     if max_mtime < one_hour_ago:
         status = True
     return status
+
 
 def send_alert_email(receiver_emails, subject_text, body_text):
     ''' Use smtp to login to gmail and send an alert email
@@ -156,12 +160,12 @@ def send_alert_email(receiver_emails, subject_text, body_text):
     password = accounts_ini.get('aws', 'password')
     if not password:
         password = input('password for AWS email account: ')
-    print('Logging into server %s, account %s' %(smtp_server, account))
+    print('Logging into server %s, account %s' % (smtp_server, account))
 
-    #----------------------------------
+    # ----------------------------------
 
     headers = f"From: {account}\r\n"
-    headers += f"To: {', '.join(receiver_emails)}\r\n" 
+    headers += f"To: {', '.join(receiver_emails)}\r\n"
     headers += f"Subject: {subject_text}\r\n"
     email_message = headers + "\r\n" + body_text  # Blank line needed between headers and body
 
@@ -170,9 +174,10 @@ def send_alert_email(receiver_emails, subject_text, body_text):
         server.login(account, password)
         # server.set_debuglevel(1)  # Show SMTP server interactions
         server.sendmail(account, receiver_emails, email_message)
-        server.quit() # may not be necessary?
+        server.quit()  # may not be necessary?
     print('Alert email sent!')
     return
+
 
 if __name__ == '__main__':
     """Executed from the command line"""
@@ -184,7 +189,7 @@ if __name__ == '__main__':
 
     # Define accounts and credentials ini file paths
     accounts_ini = ConfigParser()
-    accounts_ini.read_file(open(accounts_file))    
+    accounts_ini.read_file(open(accounts_file))
     accounts_ini.read(credentials_file)
 
     receiver_emails = [
@@ -197,11 +202,11 @@ if __name__ == '__main__':
         "shl@geus.dk",
         "bav@geus.dk",
         "maclu@geus.dk",
-        ]
+    ]
 
-    #==============================================================
+    # ==============================================================
     # DMI FTP
-    #==============================================================
+    # ==============================================================
     # dmi_alert = check_dmi_ftp_update_time() # NOT WORKING
     dmi_alert_1 = check_update_time(args.bufr_out_path)
     dmi_alert_2 = check_update_time(args.bufr_backup_path)
@@ -235,9 +240,9 @@ if __name__ == '__main__':
     else:
         print('BUFR_backup files are current. No alert issued.')
 
-    #==============================================================
+    # ==============================================================
     # L0 TX
-    #==============================================================
+    # ==============================================================
     l0tx_alert = check_update_time(args.l0_tx_path)
 
     if l0tx_alert is True:
@@ -257,9 +262,9 @@ if __name__ == '__main__':
     else:
         print('aws-l0/tx files are current. No alert issued.')
 
-    #==============================================================
+    # ==============================================================
     # L3 TX
-    #==============================================================
+    # ==============================================================
     l3tx_alert = check_update_time(args.l3_tx_path)
 
     if l3tx_alert is True:
@@ -279,9 +284,9 @@ if __name__ == '__main__':
     else:
         print('aws-l3/tx files are current. No alert issued.')
 
-    #==============================================================
+    # ==============================================================
     # L3 level_3 (joined)
-    #==============================================================
+    # ==============================================================
     l3joined_alert = check_update_time(args.l3_joined_path)
 
     if l3joined_alert is True:
