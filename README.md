@@ -17,19 +17,28 @@ aws-monitor-alert
 |       credentials.ini
 │
 └───aws_processing_monitor
-│       alert_processing.py
 |       alert_processing_wrapper.sh   
 │       stderr   
 │       stdout
 │
 └───glacio01_monitor
-        alert_glacio.py
-        alert_glacio_wrapper.sh
-        glacio01_monitor.txt
-        ssh_to_azure.sh
-        stderr
-        stdout
+│       alert_glacio.py
+│       alert_glacio_wrapper.sh
+│       glacio01_monitor.txt
+│       ssh_to_azure.sh
+│       stderr
+│       stdout
+└───src
+     │  alert_processing
+     │       __init__.py
+     │       check_alerts.py
+     │       dmi_bufr.py
+     │       email_notification.py
+     │       file_system_status.py
+     │       git_repositories.py
 ```
+The module `alert_processing` contains main all functionality for querying file status in the pipeline and for sending email notifications.
+
 Note that a `credentials` directory containing `accounts.ini` and `credentials.ini` is required at the top-level directory of this repo, and is ignored with `.gitignore`. `stdout` and `stderr` are also ignored.
 
 **It is recommended to occasionally check the `stdout` and `stderr` files at both monitoring directories to make sure the monitors are running.**
