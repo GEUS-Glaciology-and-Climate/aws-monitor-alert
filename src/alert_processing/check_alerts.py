@@ -47,21 +47,24 @@ def check_all_steps(
     # DMI FTP
     # ==============================================================
     logger.info('Checking DMI FTP')
-    dmi_alert = check_dmi_ftp(
-        current_time=current_time,
-        max_age=timedelta(hours=2),
-        user=dmi_ftp_config['user'],
-        passwd=dmi_ftp_config['password'],
-        host=dmi_ftp_config['server'],
-    )
-    logger.info(f'DMI Alert: {dmi_alert}')
-    if dmi_alert:
-        notification_client.send_alert_email(
-            subject_text="ALERT: BUFR ftp server is not updated!",
-            body_text='''The most recent concatenated BUFR file at the DMI ftp upload directory is >1 hr old (should be ~3 minutes old).
-            There could be a problem with pypromice processing or the ftp upload itself.
-            '''
+    if 'skip' in dmi_ftp_config:
+        logger.info('DMI Alert: Skipping')
+    else:
+        dmi_alert = check_dmi_ftp(
+            current_time=current_time,
+            max_age=timedelta(hours=2),
+            user=dmi_ftp_config['user'],
+            passwd=dmi_ftp_config['password'],
+            host=dmi_ftp_config['server'],
         )
+        logger.info(f'DMI Alert: {dmi_alert}')
+        if dmi_alert:
+            notification_client.send_alert_email(
+                subject_text="ALERT: BUFR ftp server is not updated!",
+                body_text='''The most recent concatenated BUFR file at the DMI ftp upload directory is >1 hr old (should be ~3 minutes old).
+                There could be a problem with pypromice processing or the ftp upload itself.
+                '''
+            )
 
     # ==============================================================
     # BUFR FILES
