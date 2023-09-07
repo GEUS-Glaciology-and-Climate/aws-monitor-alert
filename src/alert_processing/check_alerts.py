@@ -27,6 +27,7 @@ from alert_processing.email_notification import (
 )
 from alert_processing.dmi_bufr import check_dmi_ftp
 from alert_processing.file_system_status import check_update_time
+from alert_processing import git_repositories
 
 logger = logging.getLogger(__name__)
 
@@ -107,11 +108,12 @@ def check_all_steps(
     # L0 TX
     # ==============================================================
     if l0_tx_path:
-        l0tx_alert = check_update_time(
-            l0_tx_path,
+        l0tx_alert = git_repositories.check_last_commit(
+            repository_path=l0_tx_path,
             current_time=current_time,
             max_age=timedelta(hours=1),
         )
+
         if l0tx_alert:
             notification_client.send_alert_email(
                 subject_text="ALERT: aws-l0/tx files are not updating!",
