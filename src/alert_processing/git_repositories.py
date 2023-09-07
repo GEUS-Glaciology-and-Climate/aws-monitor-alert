@@ -8,8 +8,6 @@ __all__ = [
     'get_last_commit_datetime'
 ]
 
-from git import InvalidGitRepositoryError
-
 logger = logging.getLogger(__name__)
 
 
@@ -44,13 +42,9 @@ def check_last_commit(
         current_time: datetime,
         max_age: timedelta,
 ) -> bool:
-    try:
-        last_commit_datetime = get_last_commit_datetime(repository_path)
-        commit_age = current_time - last_commit_datetime
-        logger.debug(f"Commit age {repository_path}: {commit_age}")
-        return commit_age > max_age
-    except InvalidGitRepositoryError:
-        logger.error(f"Invalid git repository: {repository_path}")
-        return True
+    last_commit_datetime = get_last_commit_datetime(repository_path)
+    commit_age = current_time - last_commit_datetime
+    logger.debug(f"Commit age {repository_path}: {commit_age}")
+    return commit_age > max_age
 
 # %%
