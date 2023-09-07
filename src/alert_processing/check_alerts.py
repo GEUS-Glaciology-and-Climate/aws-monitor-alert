@@ -18,7 +18,7 @@ from argparse import ArgumentParser
 from configparser import ConfigParser
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Mapping
+from typing import Mapping, Optional
 
 from alert_processing.email_notification import (
     EmailNotificationClient,
@@ -34,12 +34,12 @@ logger = logging.getLogger(__name__)
 def check_all_steps(
         current_time: datetime,
         notification_client: NotificationClient,
-        bufr_out_path: Path,
-        bufr_backup_path: Path,
+        bufr_out_path: Optional[Path],
+        bufr_backup_path: Optional[Path],
         dmi_ftp_config: Mapping,
-        l0_tx_path: Path,
-        l3_tx_path: Path,
-        l3_joined_path: Path,
+        l0_tx_path: Optional[Path],
+        l3_tx_path: Optional[Path],
+        l3_joined_path: Optional[Path],
 ):
     logger.info("Checking pipeline data status")
 
@@ -230,9 +230,9 @@ if __name__ == '__main__':
         current_time=current_time,
         notification_client=notification_client,
         dmi_ftp_config=config_parser['dmi'],
-        bufr_out_path=config_parser.getpath('local', 'bufr-out-path'),
-        bufr_backup_path=config_parser.getpath('local', 'bufr-backup-path'),
-        l0_tx_path=config_parser.getpath('local', 'l0-tx-path'),
-        l3_tx_path=config_parser.getpath('local', 'l3-tx-path'),
-        l3_joined_path=config_parser.getpath('local', 'l3-joined-path'),
+        bufr_out_path=config_parser.getpath('local', 'bufr-out-path', fallback=None),
+        bufr_backup_path=config_parser.getpath('local', 'bufr-backup-path', fallback=None),
+        l0_tx_path=config_parser.getpath('local', 'l0-tx-path', fallback=None),
+        l3_tx_path=config_parser.getpath('local', 'l3-tx-path', fallback=None),
+        l3_joined_path=config_parser.getpath('local', 'l3-joined-path', fallback=None),
     )
