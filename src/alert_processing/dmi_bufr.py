@@ -1,8 +1,7 @@
+import pandas as pd
 import re
 from datetime import timedelta, datetime
 from ftplib import FTP
-
-import pandas as pd
 
 __all__ = [
     "get_dmi_bufr_stats",
@@ -26,6 +25,7 @@ def parse_list_line(line: str):
 
 
 def get_dmi_bufr_stats(user: str, passwd: str, host: str = "ftpserver.dmi.dk") -> pd.DataFrame:
+    """NOTE: THIS MIGHT NOT WORKING. The DMI ftp server is not always responding to list queries on `./upload`."""
     with FTP(host=host) as ftp:
         ftp.login(user=user, passwd=passwd)
         ftp.dir('upload', parse_list_line)
@@ -40,6 +40,7 @@ def check_dmi_ftp(
         max_age: timedelta,
         **dmi_credentials,
 ) -> bool:
+    """NOTE: THIS MIGHT NOT WORKING. The DMI ftp server is not always responding to list queries on `./upload`."""
     dmi_bufr_stats = get_dmi_bufr_stats(**dmi_credentials)
     dmi_bufr_age = current_time - dmi_bufr_stats['datetime'].max()
     return dmi_bufr_age > max_age
