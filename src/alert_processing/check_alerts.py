@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 
-'''
+"""
 Monitor and alert based on metrics related to AWS processing.
 
 Currently implemented:
 - Check latest BUFR file timestamp at DMI ftp upload directory
+- Check latest BUFR file timestamp bufr out path
+- Check latest BUFR file timestamp bufr backup path
 - Check aws-l0/tx file update times
 - Check aws-l3/tx file update times
 - Check aws-l3/level_3 file update times
 
-Patrick Wright, GEUS
-Jan 16, 2023
-'''
-import logging
+"""
+import logging.handlers
 import sys
 from argparse import ArgumentParser
 from configparser import ConfigParser
@@ -20,14 +20,14 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Mapping, Optional
 
+from alert_processing import git_repositories
+from alert_processing.dmi_bufr import check_dmi_ftp
 from alert_processing.email_notification import (
     EmailNotificationClient,
     NotificationClient,
     LogNotificationClient,
 )
-from alert_processing.dmi_bufr import check_dmi_ftp
 from alert_processing.file_system_status import check_update_time
-from alert_processing import git_repositories
 
 logger = logging.getLogger(__name__)
 
@@ -171,6 +171,7 @@ def parse_arguments():
     parser = ArgumentParser(description="Monitor for aws processing")
     parser.add_argument('-c', '--config_files', type=Path, nargs='+',
                         help='Path to ini files with account and credential information')
+    parser.add_argument('-l', )
     parser.add_argument('--l0-tx-path', help='Path to l0 tx directory')
     parser.add_argument('--l3-tx-path', help='Path to l3 tx directory')
     parser.add_argument('--l3-joined-path', help='Path to l3 level_3 (joined) directory')
@@ -207,10 +208,26 @@ if __name__ == '__main__':
     if args.receiver_emails:
         config_parser.set('monitoring', 'receiver_emails', args.receiver_emails),
 
+    # Setup logging
+    handlers = [
+        logging.StreamHandler(stream=sys.stdout)
+    ]
+    log_level = config_parser.get('logging', 'level', fallback="INFO").upper()
+    log_path = config_parser.getpath('logging', 'log_path', fallback=None)
+    if isinstance(log_path, Path):
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        file_handler = logging.handlers.TimedRotatingFileHandler(
+            filename=log_path,
+            when='D',
+            interval=1,
+            backupCount=10,
+            utc=True,
+        )
+        handlers.append(file_handler)
     logging.basicConfig(
         format='%(asctime)s; %(levelname)s; %(name)s; %(message)s',
-        level=logging.DEBUG,
-        stream=sys.stdout,
+        level=log_level,
+        handlers=handlers,
     )
 
     # Define accounts and credentials ini file paths
