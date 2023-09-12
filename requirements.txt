@@ -1,4 +1,0 @@
-attrs~=23.1
-pandas~=2.0
-xarray
-beautifulsoup4
