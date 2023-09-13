@@ -1,44 +1,74 @@
 # aws-monitor-alert
+
 Monitoring and alerting of processing resources for automatic weather stations (aws).
 
-To develop with this code, you need to activate the `py39-monitor` conda environment on Azure.
-If you are developing elsewhere setup a fresh python 3.9 conda env and install any additional needed requirements.
-(`requirements.txt` coming soon...!)
+These repository implement our own custom monitoring and alerting scripts (sending emails from geus.aws@gmail.com), and
+are
+separate from any Azure monitoring tools. Metrics on the Azure virtual machine such as CPU, memory, disk space, etc are
+currently monitored using built-in Azure monitoring tools.
 
-The required directory structure of this repo is:
+## Installation
+
+It is implemented as a python package and can be installed using pip
+
 ```
-aws-monitor-alert
-│   README.md
-│   .git/
-|   .gitignore
-│
-└───credentials
-│       accounts.ini
-|       credentials.ini
-│
-└───aws_processing_monitor
-│       alert_processing.py
-|       alert_processing_wrapper.sh   
-│       stderr   
-│       stdout
-│
-└───glacio01_monitor
-        alert_glacio.py
-        alert_glacio_wrapper.sh
-        glacio01_monitor.txt
-        ssh_to_azure.sh
-        stderr
-        stdout
+pip install .
 ```
-Note that a `credentials` directory containing `accounts.ini` and `credentials.ini` is required at the top-level directory of this repo, and is ignored with `.gitignore`. `stdout` and `stderr` are also ignored.
 
-**It is recommended to occasionally check the `stdout` and `stderr` files at both monitoring directories to make sure the monitors are running.**
+## Structure
 
-These scripts implement our own custom monitoring and alerting (sending emails from geus.aws@gmail.com), and are separate from any Azure monitoring tools. Metrics on the Azure virtual machine such as CPU, memory, disk space, etc are currently monitored using built-in Azure monitoring tools.
+The module `alert_processing` contains all main functionality for querying file status in the pipeline and for sending
+email notifications. The source code is located in `./src/alert_processing`.
 
-The following are currently implemented:
+## Check alerts
 
-## glacio01 monitor
+The script `alert_processing.check_alerts` reads and validates datetime information from
+
+* latest BUFR file timestamp at DMI ftp upload directory
+* latest BUFR file timestamp bufr out path
+* latest BUFR file timestamp bufr backup path
+* latest aws-l0/tx file update times
+* latest aws-l3/tx file update times
+* latest aws-l3/level_3 file update times
+
+It uses one or many ini-files for configuring the local environment and credentials. See [AWS Azure](#aws-azure) for
+example.
+
+```bash
+python -m alert_processing.check_alerts -c path/to/environment_config.ini path/to/credentials.ini
+```
+
+### Logs
+
+The script writes log messages to stdout.
+It is also possible to prove a log path to the configuration file which
+will be updated
+using [TimedRotatingFileHandler](https://docs.python.org/3.10/library/logging.handlers.html#logging.handlers.TimedRotatingFileHandler)
+keeping log files from the last 10 days.
+
+### AWS Azure
+
+The directory `aws_processing_monitor` contains the environment configuration for aws_azure and a wrapper script to
+invoke `check_alerts`:
+
+* [aws_processing_monitor/aws_azure.ini](aws_processing_monitor/aws_azure.ini)
+* [aws_processing_monitor/alert_processing_wrapper.sh](aws_processing_monitor/alert_processing_wrapper.sh)
+
+## Crontab configurations
+
+### AWS Azure
+
+Contab configuration on the AWS Azure server. It is configured to run at 11 minutes after the hour.
+
+```cronexp
+11 * * * * . /home/aws/.bashrc; cd /home/aws/aws-monitor-alert/aws_processing_monitor; ./alert_processing_wrapper.sh > stdout 2>stderr
+```
+
+# glacio01 monitor
+
+This section contains the original readme entry related to glacio01 monitoring. This functionality has not been changed
+in the newest updates.
+
 A simple monitoring tool to check if the glacio01 server is alive.
 
 The `alert_glacio.py` monitoring script is intended to work with the following routine:
@@ -58,49 +88,16 @@ Run with `alert_glacio_wrappper.sh` on Azure crontab as:
 ```
 
 `ssh_to_azure.sh` is run on glacio01 crontab as:
+
 ```
 # ssh to Azure and update .txt file, for monitoring of glacio01
 0 * * * * . /home/aws/.bashrc; cd /home/aws/aws-monitor-alert/glacio01_monitor; ./ssh_to_azure.sh  > stdout 2>stderr
 ```
+
 A successful run with no alerts issued will appear in `~/aws-monitor-alert/glacio01_monitor/stdout` as:
+
 ```
 Running alert_glacio.py at Tue Jan 17 13:32:26 UTC 2023
 glacio01_monitor.txt is current. No alert issued.
-FINISHED
-```
-
-## AWS processing monitors
-
-Multiple monitors for AWS processing (pypromice) are run from `alert_processing.py` at 11 minutes after the hour. Run with `alert_processing_wrapper.sh` on Azure crontab as:
-
-```
-# Monitor/alert for aws processing
-11 * * * * . /home/aws/.bashrc; cd /home/aws/aws-monitor-alert/aws_processing_monitor; ./alert_processing_wrapper.sh > stdout 2>stderr
-```
-Individually monitored processes include the following:
-
-### DMI BUFR upload
-
-Log into the DMI ftp server and get the filename of the most recently updated file (files are named such as `'geus_20230116T1307.bufr'`). Parse the time string into an epoch (unix) time. If this time is >1 hr old (and <2 hrs old), send out alert emails. We should always have some stations reporting hourly all year round, therefore we should always have an hourly BUFR file upload.
-
-### aws-l0 and aws-l3 file update times
-
-This monitor is implemented for the following directory paths on Azure:
-
-- `aws-l0/tx`
-- `aws-l3/tx`
-- `aws-l3/level_3`
-
-`walk` through all files (or subdirectories and files if present) and find most recently updated file. If this time is >1 hr old (and <2 hrs old), send out alert emails.
-
-A successful run with no alerts issued will appear in `~/aws-monitor-alert/aws_processing_monitor/stdout` as:
-```
-Running alert_processing.py at Tue Jan 17 13:32:43 UTC 2023
-Logging into ftpserver.dmi.dk
-Latest BUFR: geus_20230117T1307.bufr
-DMI BUFR file is current. No alert issued.
-aws-l0/tx files are current. No alert issued.
-aws-l3/tx files are current. No alert issued.
-aws-l3/level_3 files are current. No alert issued.
 FINISHED
 ```
